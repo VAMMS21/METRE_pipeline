@@ -95,7 +95,7 @@ def get_patient_group(args, client):
                 i.stay_id,
                 i.gender,
                 i.admission_age as age,
-                i.ethnicity,
+                i.race,
                 i.hospital_expire_flag,
                 i.hospstay_seq,
                 i.los_icu,
@@ -142,7 +142,7 @@ def get_patient_group(args, client):
                 i.stay_id,
                 i.gender,
                 i.admission_age as age,
-                i.ethnicity,
+                i.race,
                 i.hospital_expire_flag,
                 i.hospstay_seq,
                 i.los_icu,
@@ -866,7 +866,7 @@ def get_patient_group_eicu(args, client):
     if args.patient_group != 'Generic':
         query = \
             """
-            SELECT i.patientunitstayid, i.gender, i.age, i.ethnicity,  
+            SELECT i.patientunitstayid, i.gender, i.age, i.race,  
                     CASE WHEN lower(i.hospitaldischargestatus) like '%alive%' THEN 0
                         WHEN lower(i.hospitaldischargestatus) like '%expired%' THEN 1
                         ELSE NULL END AS hosp_mort,
@@ -885,7 +885,7 @@ def get_patient_group_eicu(args, client):
     else:
         query = \
             """
-            SELECT i.patientunitstayid, i.gender, i.age, i.ethnicity,  
+            SELECT i.patientunitstayid, i.gender, i.age, i.race,  
                     CASE WHEN lower(i.hospitaldischargestatus) like '%alive%' THEN 0
                         WHEN lower(i.hospitaldischargestatus) like '%expired%' THEN 1
                         ELSE NULL END AS hosp_mort,
