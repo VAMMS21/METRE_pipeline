@@ -74,6 +74,7 @@ def process_query_results(df, fill_df):
                 apply aggregation function, shape e.g. (2697900, 44), with row index same as fill_df
                 but column becomes a multiindex, e.g. level 0: so2, level 1: mean, count
     """
+    df = df.apply(pd.to_numeric, errors='coerce')
     df = df.groupby(ID_COLS + ['hours_in']).agg(['mean', 'count'])
     df.index = df.index.set_levels(df.index.levels[1].astype(int), level=1)
     df = df.reindex(fill_df.index)
