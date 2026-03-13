@@ -95,13 +95,13 @@ def extract_mimic(args):
     cbc.drop(columns=['charttime', 'icu_intime', 'specimen_id', 'wbc'], inplace=True)
     cbc = process_query_results(cbc, fill_df)
 
-    # query culture
-    culture = query_culture_mimic(client, subject_to_keep)
-    culture.rename(columns={'specimen': 'specimen_culture'}, inplace=True)
-    culture['hours_in'] = (culture['charttime'] - culture['icu_intime']).apply(to_hours)
-    culture.drop(columns=['charttime', 'icu_intime'], inplace=True)
-    culture = culture.groupby(ID_COLS + ['hours_in']).agg(['last'])
-    culture = culture.reindex(fill_df.index)
+    # # query culture
+    # culture = query_culture_mimic(client, subject_to_keep)
+    # culture.rename(columns={'specimen': 'specimen_culture'}, inplace=True)
+    # culture['hours_in'] = (culture['charttime'] - culture['icu_intime']).apply(to_hours)
+    # culture.drop(columns=['charttime', 'icu_intime'], inplace=True)
+    # culture = culture.groupby(ID_COLS + ['hours_in']).agg(['last'])
+    # culture = culture.reindex(fill_df.index)
 
     # query enzyme
     enzyme = query_enzyme_mimic(client, subject_to_keep)
@@ -163,8 +163,11 @@ def extract_mimic(args):
     chart_lab = chart_lab.reindex(columns=new_cols[0])
 
     # join all dataframes
+    # total = bg.join(
+    #     [vitalsign, blood_diff, cardiac_marker, chemistry, coagulation, cbc, culture, enzyme, gcs, inflammation, uo])
+    
     total = bg.join(
-        [vitalsign, blood_diff, cardiac_marker, chemistry, coagulation, cbc, culture, enzyme, gcs, inflammation, uo])
+        [vitalsign, blood_diff, cardiac_marker, chemistry, coagulation, cbc, enzyme, gcs, inflammation, uo])
 
     # start combining and drop some columns either due to redundancy or not well-populated
     # drop some columns (not well-populated or already dependent on existing columns )
@@ -192,10 +195,10 @@ def extract_mimic(args):
         total.loc[:, idx[names[0], ['mean', 'count']]] = filled.loc[:, ['mean', 'count']].values
         total.drop(names[1], axis=1, level=0, inplace=True)
 
-    with open('./json_files/mimic_culturesite_map.json') as f:
-        csite_map = json.load(f)
-    total.loc[:, idx['specimen_culture', ['last']]] = pd.Series(
-        np.squeeze(total.loc[:, idx['specimen_culture', ['last']]].values)).map(csite_map).values
+    # with open('./json_files/mimic_culturesite_map.json') as f:
+    #     csite_map = json.load(f)
+    # total.loc[:, idx['specimen_culture', ['last']]] = pd.Series(
+    #     np.squeeze(total.loc[:, idx['specimen_culture', ['last']]].values)).map(csite_map).values
 
     # drop Eosinophils
     chart_lab.drop('Eosinophils', axis=1, level=0, inplace=True)
