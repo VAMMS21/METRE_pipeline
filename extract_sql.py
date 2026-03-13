@@ -443,7 +443,7 @@ def query_uo_mimic(client, icuids_to_keep):
     # uo = gcp2df(client, query)
 
     import pandas as pd
-    uo = pd.DataFrame()  # devolve um DataFrame vazio
+    uo = pd.DataFrame(columns=['stay_id', 'charttime', 'weight', 'uo', 'icu_intime', 'subject_id', 'hadm_id'])
     return uo
 
 
