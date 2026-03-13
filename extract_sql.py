@@ -432,15 +432,18 @@ def query_inflammation_mimic(client, subject_to_keep):
 
 
 def query_uo_mimic(client, icuids_to_keep):
-    query = """
-        SELECT g.stay_id, g.charttime, g.weight, g.uo, i.icu_intime, i.subject_id, i.hadm_id
-        FROM physionet-data.mimiciv_2_2_derived.urine_output_rate g 
-        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = g.stay_id
-        where g.stay_id in ({icuids})
-        and g.charttime between i.icu_intime and i.icu_outtime
+    # query = """
+    #     SELECT g.stay_id, g.charttime, g.weight, g.uo, i.icu_intime, i.subject_id, i.hadm_id
+    #     FROM physionet-data.mimiciv_2_2_derived.urine_output_rate g 
+    #     INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = g.stay_id
+    #     where g.stay_id in ({icuids})
+    #     and g.charttime between i.icu_intime and i.icu_outtime
 
-        """.format(icuids=','.join(icuids_to_keep))
-    uo = gcp2df(client, query)
+    #     """.format(icuids=','.join(icuids_to_keep))
+    # uo = gcp2df(client, query)
+
+    import pandas as pd
+    uo = pd.DataFrame()  # devolve um DataFrame vazio
     return uo
 
 
