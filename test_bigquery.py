@@ -8,8 +8,8 @@ client = bigquery.Client(project=project_id)
 
 query = """
 SELECT *
-FROM `physionet-data.mimiciv_2_2_derived.icustays`
-LIMIT 10
+FROM `physionet-data.mimiciv_2_2_hosp.patients`
+LIMIT 5
 """
 
 df = client.query(query).to_dataframe()
