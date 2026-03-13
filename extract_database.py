@@ -275,6 +275,11 @@ def extract_mimic(args):
             vital_final[col] = 0
     with open('./json_files/mimic_col_order.pickle', 'rb') as f:
         mimic_col_order = pickle.load(f)
+
+    # Filtra apenas as colunas existentes
+    existing_cols = [col for col in mimic_col_order if col in vital_final.columns]
+    vital_final = vital_final[existing_cols]
+ 
     vital_final = vital_final[mimic_col_order]
     print('Start querying variables in the Intervention table')
     ####### Done vital table #######
