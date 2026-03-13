@@ -251,7 +251,7 @@ def extract_mimic(args):
     # screen and positive culture needs impute, they are last columns but with float data type
     vital_encode = pd.get_dummies(vital)
 
-    vital_encode[('positive_culture', 'mask')] = (~vital_encode[('positive_culture', 'last')].isnull()).astype(float)
+    # vital_encode[('positive_culture', 'mask')] = (~vital_encode[('positive_culture', 'last')].isnull()).astype(float)
     vital_encode[('screen', 'mask')] = (~vital_encode[('screen', 'last')].isnull()).astype(float)
     vital_encode[('has_sensitivity', 'mask')] = (~vital_encode[('has_sensitivity', 'last')].isnull()).astype(float)
     # X_encode.fillna(value=0, inplace=True)
@@ -259,7 +259,7 @@ def extract_mimic(args):
 
     col = vital_encode.columns.to_list()
     col.insert(col.index(('screen', 'last')) + 1, ('screen', 'mask'))
-    col.insert(col.index(('positive_culture', 'last')) + 1, ('positive_culture', 'mask'))
+    # col.insert(col.index(('positive_culture', 'last')) + 1, ('positive_culture', 'mask'))
     col.insert(col.index(('has_sensitivity', 'last')) + 1, ('has_sensitivity', 'mask'))
 
     vital_final = vital_encode[col[:-3]]
@@ -462,7 +462,7 @@ def extract_mimic(args):
     vital_final = vital_final.fillna(0)
     # convert to int in stead of int64 which will be problematic for hdf saving
     vital_final[('screen', 'last')] = vital_final[('screen', 'last')].astype('uint8')
-    vital_final[('positive_culture', 'last')] = vital_final[('positive_culture', 'last')].astype('uint8')
+    # vital_final[('positive_culture', 'last')] = vital_final[('positive_culture', 'last')].astype('uint8')
     vital_final[('has_sensitivity', 'last')] = vital_final[('has_sensitivity', 'last')].astype('uint8')
 
     if args.exit_point == 'Impute':
