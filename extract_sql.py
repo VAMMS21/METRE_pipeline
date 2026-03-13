@@ -95,7 +95,7 @@ def get_patient_group(args, client):
                 i.stay_id,
                 i.gender,
                 i.admission_age as age,
-                i.ethnicity,
+                i.race,
                 i.hospital_expire_flag,
                 i.hospstay_seq,
                 i.los_icu,
@@ -142,7 +142,7 @@ def get_patient_group(args, client):
                 i.stay_id,
                 i.gender,
                 i.admission_age as age,
-                i.ethnicity,
+                i.race,
                 i.hospital_expire_flag,
                 i.hospstay_seq,
                 i.los_icu,
@@ -866,7 +866,7 @@ def get_patient_group_eicu(args, client):
     if args.patient_group != 'Generic':
         query = \
             """
-            SELECT i.patientunitstayid, i.gender, i.age, i.ethnicity,  
+            SELECT i.patientunitstayid, i.gender, i.age, i.race,  
                     CASE WHEN lower(i.hospitaldischargestatus) like '%alive%' THEN 0
                         WHEN lower(i.hospitaldischargestatus) like '%expired%' THEN 1
                         ELSE NULL END AS hosp_mort,
@@ -885,7 +885,7 @@ def get_patient_group_eicu(args, client):
     else:
         query = \
             """
-            SELECT i.patientunitstayid, i.gender, i.age, i.ethnicity,  
+            SELECT i.patientunitstayid, i.gender, i.age, i.race,  
                     CASE WHEN lower(i.hospitaldischargestatus) like '%alive%' THEN 0
                         WHEN lower(i.hospitaldischargestatus) like '%expired%' THEN 1
                         ELSE NULL END AS hosp_mort,
@@ -1623,7 +1623,7 @@ def query_anti_eicu(client, icuids_to_keep, tw_in_minutes):
           OR REGEXP_CONTAINS(lower(drugname), r"^.*ocudox.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*ofloxacin.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*omnicef.*$")
-          OR REGEXP_CONTAINS(lower(drugname), r"^.*oethnicitya.*$")
+          OR REGEXP_CONTAINS(lower(drugname), r"^.*oracea.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*oraxyl.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*oxacillin.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*pc pen vk.*$")
@@ -1646,7 +1646,7 @@ def query_anti_eicu(client, icuids_to_keep, tw_in_minutes):
           OR REGEXP_CONTAINS(lower(drugname), r"^.*septra ds.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*septra.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*solodyn.*$")
-          OR REGEXP_CONTAINS(lower(drugname), r"^.*spectethnicityf.*$")
+          OR REGEXP_CONTAINS(lower(drugname), r"^.*spectracef.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*streptomycin.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*sulfadiazine.*$")
           OR REGEXP_CONTAINS(lower(drugname), r"^.*sulfamethoxazole.*$")
