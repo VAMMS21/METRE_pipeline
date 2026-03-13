@@ -431,19 +431,34 @@ def query_inflammation_mimic(client, subject_to_keep):
     return inflammation
 
 
+# def query_uo_mimic(client, icuids_to_keep):
+#     # query = """
+#     #     SELECT g.stay_id, g.charttime, g.weight, g.uo, i.icu_intime, i.subject_id, i.hadm_id
+#     #     FROM physionet-data.mimiciv_2_2_derived.urine_output_rate g 
+#     #     INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = g.stay_id
+#     #     where g.stay_id in ({icuids})
+#     #     and g.charttime between i.icu_intime and i.icu_outtime
+
+#     #     """.format(icuids=','.join(icuids_to_keep))
+#     # uo = gcp2df(client, query)
+
+#     return uo
+
 def query_uo_mimic(client, icuids_to_keep):
-    # query = """
-    #     SELECT g.stay_id, g.charttime, g.weight, g.uo, i.icu_intime, i.subject_id, i.hadm_id
-    #     FROM physionet-data.mimiciv_2_2_derived.urine_output_rate g 
-    #     INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = g.stay_id
-    #     where g.stay_id in ({icuids})
-    #     and g.charttime between i.icu_intime and i.icu_outtime
-
-    #     """.format(icuids=','.join(icuids_to_keep))
-    # uo = gcp2df(client, query)
-
-    import pandas as pd
-    uo = pd.DataFrame(columns=['stay_id', 'charttime', 'weight', 'uo', 'icu_intime', 'subject_id', 'hadm_id'])
+    # Criar um DataFrame mínimo com colunas que o METRE espera
+    # Uma linha por ICU para não quebrar índices
+    data = []
+    for stay_id in icuids_to_keep:
+        data.append({
+            'stay_id': stay_id,
+            'charttime': pd.Timestamp('2000-01-01'),  # valor fictício
+            'weight': 70.0,                           # valor fictício
+            'uo': 0.0,                                # débito urinário nulo
+            'icu_intime': pd.Timestamp('2000-01-01'), # valor fictício
+            'subject_id': 0,                           # valor fictício
+            'hadm_id': 0                               # valor fictício
+        })
+    uo = pd.DataFrame(data)
     return uo
 
 
