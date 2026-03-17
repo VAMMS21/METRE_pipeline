@@ -3,9 +3,6 @@ SQL script to extract data from the database
 '''
 import pandas as pd
 
-# AAAAAA
-
-
 def gcp2df(client, sql, job_config=None):
     que = client.query(sql, job_config)
     results = que.result()
