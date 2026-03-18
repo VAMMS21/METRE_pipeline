@@ -142,6 +142,9 @@ def extract_mimic(args):
     # additional chart and lab
     chart_lab = query_chart_lab_mimic(client, icuids_to_keep, chart_items, lab_items)
     chart_lab['value'] = pd.to_numeric(chart_lab['value'], 'coerce')
+
+    chart_lab.drop(columns=['valueuom'], inplace=True)  
+
     chart_lab = chart_lab.set_index('stay_id').join(patient[['icu_intime']])
     chart_lab['hours_in'] = (chart_lab['charttime'] - chart_lab['icu_intime']).apply(to_hours)
     chart_lab.drop(columns=['charttime', 'icu_intime'], inplace=True)
