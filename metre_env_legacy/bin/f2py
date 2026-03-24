@@ -1,0 +1,6 @@
+#!/Users/vascoantoniosilva/Desktop/ICU_Pipeline/METRE_pipeline/metre_env_legacy/bin/python3.9
+import sys
+from numpy.f2py.f2py2e import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())

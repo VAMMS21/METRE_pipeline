@@ -521,7 +521,7 @@ def query_heparin_mimic(client, subject_to_keep):
     query = \
         """
     SELECT he.subject_id, he.starttime, he.stoptime as endtime, i.hadm_id, i.stay_id, i.icu_intime, i.icu_outtime
-    FROM physionet-data.mimiciv_3_1_derived.heparin he
+    FROM metre-489201.mimiciv_3_1_new_heparin.heparin he
     INNER JOIN physionet-data.mimiciv_3_1_derived.icustay_detail i ON i.subject_id = he.subject_id
     WHERE he.subject_id in ({ids}) 
     AND  he.starttime < i.icu_outtime
