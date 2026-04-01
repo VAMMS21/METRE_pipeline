@@ -3,6 +3,8 @@ SQL script to extract data from the database
 '''
 import pandas as pd
 
+# AAAAAA
+
 
 def gcp2df(client, sql, job_config=None):
     que = client.query(sql, job_config)
@@ -15,7 +17,7 @@ def get_group_id(args, client):
         query = \
             """
             SELECT  stay_id
-            FROM physionet-data.mimic_derived.sepsis3
+            FROM physionet-data.mimiciv_2_2_derived.sepsis3
             """
         id_df = gcp2df(client, query)
         group_stay_ids = set([str(s) for s in id_df['stay_id']])
@@ -24,21 +26,21 @@ def get_group_id(args, client):
         query = \
             """
             SELECT DISTINCT stay_id
-            FROM physionet-data.mimic_icu.chartevents
+            FROM physionet-data.mimiciv_2_2_icu.chartevents
             WHERE itemid = 224700 or  itemid = 220339
 
             UNION ALL
 
             SELECT i.stay_id
-            FROM physionet-data.mimic_hosp.labevents l
-            LEFT JOIN physionet-data.mimic_icu.icustays i on l.subject_id = i.subject_id 
+            FROM physionet-data.mimiciv_2_2_hosp.labevents l
+            LEFT JOIN physionet-data.mimiciv_2_2_derived.icustays i on l.subject_id = i.subject_id 
             WHERE l.itemid = 50819 
             AND l.charttime between i.intime and i.outtime 
 
             UNION ALL 
 
             SELECT DISTINCT v.stay_id 
-            FROM physionet-data.mimic_derived.ventilation v
+            FROM physionet-data.mimiciv_2_2_derived.ventilation v
             """
         id_df = gcp2df(client, query)
         group_stay_ids = set([str(s) for s in id_df['stay_id']])
@@ -46,7 +48,7 @@ def get_group_id(args, client):
         query = \
             """
             SELECT DISTINCT stay_id
-            FROM physionet-data.mimic_derived.vasoactive_agent
+            FROM physionet-data.mimiciv_2_2_derived.vasoactive_agent
             WHERE norepinephrine is not null 
             OR epinephrine is not null 
             OR dopamine is not null 
@@ -59,8 +61,8 @@ def get_group_id(args, client):
         query = \
             """
             SELECT DISTINCT i.stay_id
-            FROM physionet-data.mimic_derived.charlson c
-            LEFT JOIN physionet-data.mimic_icu.icustays i on c.hadm_id = i.hadm_id 
+            FROM physionet-data.mimiciv_2_2_derived.charlson c
+            LEFT JOIN physionet-data.mimiciv_2_2_derived.icustays i on c.hadm_id = i.hadm_id 
             WHERE c.congestive_heart_failure = 1 and i.stay_id is not null
             """
         id_df = gcp2df(client, query)
@@ -69,8 +71,8 @@ def get_group_id(args, client):
         query = \
             """
             SELECT DISTINCT i.stay_id
-            FROM physionet-data.mimic_derived.charlson c
-            LEFT JOIN physionet-data.mimic_icu.icustays i on c.hadm_id = i.hadm_id 
+            FROM physionet-data.mimiciv_2_2_derived.charlson c
+            LEFT JOIN physionet-data.mimiciv_2_2_icu.icustays i on c.hadm_id = i.hadm_id 
             WHERE c.chronic_pulmonary_disease = 1 and i.stay_id is not null
             """
         id_df = gcp2df(client, query)
@@ -108,15 +110,15 @@ def get_patient_group(args, client):
                 CASE when a.deathtime between i.icu_intime and i.icu_outtime THEN 1 ELSE 0 END AS mort_icu,
                 CASE when a.deathtime between i.admittime and i.dischtime THEN 1 ELSE 0 END AS mort_hosp,
                 COALESCE(f.readmission_30, 0) AS readmission_30
-            FROM physionet-data.mimic_derived.icustay_detail i
-                INNER JOIN physionet-data.mimic_core.admissions a ON i.hadm_id = a.hadm_id
-                INNER JOIN physionet-data.mimic_icu.icustays s ON i.stay_id = s.stay_id
+            FROM physionet-data.mimiciv_2_2_derived.icustay_detail i
+                INNER JOIN physionet-data.mimiciv_2_2_hosp.admissions a ON i.hadm_id = a.hadm_id
+                INNER JOIN physionet-data.mimiciv_2_2_icu.icustays s ON i.stay_id = s.stay_id
                 LEFT OUTER JOIN (SELECT d.stay_id, 1 as readmission_30
-                            FROM physionet-data.mimic_icu.icustays c, physionet-data.mimic_icu.icustays d
+                            FROM physionet-data.mimiciv_2_2_icu.icustays c, physionet-data.mimiciv_2_2_icu.icustays d
                             WHERE c.subject_id=d.subject_id
                             AND c.stay_id > d.stay_id
                             AND c.intime - d.outtime <= INTERVAL 30 DAY
-                            AND c.outtime = (SELECT MIN(e.outtime) from physionet-data.mimic_icu.icustays e 
+                            AND c.outtime = (SELECT MIN(e.outtime) from physionet-data.mimiciv_2_2_icu.icustays e 
                                             WHERE e.subject_id=c.subject_id
                                             AND e.intime>d.outtime) ) f
                             ON i.stay_id=f.stay_id
@@ -155,15 +157,15 @@ def get_patient_group(args, client):
                 CASE when a.deathtime between i.icu_intime and i.icu_outtime THEN 1 ELSE 0 END AS mort_icu,
                 CASE when a.deathtime between i.admittime and i.dischtime THEN 1 ELSE 0 END AS mort_hosp,
                 COALESCE(f.readmission_30, 0) AS readmission_30
-            FROM physionet-data.mimic_derived.icustay_detail i
-                INNER JOIN physionet-data.mimic_core.admissions a ON i.hadm_id = a.hadm_id
-                INNER JOIN physionet-data.mimic_icu.icustays s ON i.stay_id = s.stay_id
+            FROM physionet-data.mimiciv_2_2_derived.icustay_detail i
+                INNER JOIN physionet-data.mimiciv_2_2_hosp.admissions a ON i.hadm_id = a.hadm_id
+                INNER JOIN physionet-data.mimiciv_2_2_icu.icustays s ON i.stay_id = s.stay_id
                 LEFT OUTER JOIN (SELECT d.stay_id, 1 as readmission_30
-                            FROM physionet-data.mimic_icu.icustays c, physionet-data.mimic_icu.icustays d
+                            FROM physionet-data.mimiciv_2_2_icu.icustays c, physionet-data.mimiciv_2_2_icu.icustays d
                             WHERE c.subject_id=d.subject_id
                             AND c.stay_id > d.stay_id
                             AND c.intime - d.outtime <= INTERVAL 30 DAY
-                            AND c.outtime = (SELECT MIN(e.outtime) from physionet-data.mimic_icu.icustays e 
+                            AND c.outtime = (SELECT MIN(e.outtime) from physionet-data.mimiciv_2_2_icu.icustays e 
                                             WHERE e.subject_id=c.subject_id
                                             AND e.intime>d.outtime) ) f
                             ON i.stay_id=f.stay_id
@@ -185,8 +187,8 @@ def get_patient_group(args, client):
 def query_bg_mimic(client, subject_to_keep):
     query = """
     SELECT b.*, i.stay_id, i.icu_intime
-    FROM physionet-data.mimic_derived.bg b
-    INNER JOIN physionet-data.mimic_derived.icustay_detail i ON b.subject_id = i.subject_id
+    FROM physionet-data.mimiciv_2_2_derived.bg b
+    INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON b.subject_id = i.subject_id
     where b.subject_id in ({icuids})
     and b.charttime between i.icu_intime and i.icu_outtime
 
@@ -220,7 +222,7 @@ def query_vitals_mimic(client, icuids_to_keep):
           , MAX(CASE WHEN itemid = 224642 THEN value ELSE NULL END) AS temperature_site
           , AVG(case when itemid in (220277) and valuenum > 0 and valuenum <= 100 then valuenum else null end) as spo2
           , AVG(case when itemid in (225664,220621,226537) and valuenum > 0 then valuenum else null end) as glucose
-          FROM  physionet-data.mimic_icu.chartevents ce
+          FROM  physionet-data.mimiciv_2_2_icu.chartevents ce
           where ce.stay_id IS NOT NULL
           and ce.itemid in
           (
@@ -252,7 +254,7 @@ def query_vitals_mimic(client, icuids_to_keep):
 
         SELECT b.*, i.hadm_id, i.icu_intime
         FROM vitalsign b 
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON b.stay_id = i.stay_id
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON b.stay_id = i.stay_id
         where b.stay_id in ({icuids})
         and b.charttime between i.icu_intime and i.icu_outtime
         """.format(icuids=','.join(icuids_to_keep))
@@ -264,8 +266,8 @@ def query_vitals_mimic(client, icuids_to_keep):
 def query_blood_diff_mimic(client, subject_to_keep):
     query = """
         SELECT b.*, i.stay_id, i.icu_intime
-        FROM physionet-data.mimic_derived.blood_differential b
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.subject_id = b.subject_id
+        FROM physionet-data.mimiciv_2_2_derived.blood_differential b
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.subject_id = b.subject_id
         where b.subject_id in ({icuids})
         and b.charttime between i.icu_intime and i.icu_outtime
 
@@ -278,8 +280,8 @@ def query_blood_diff_mimic(client, subject_to_keep):
 def query_cardiac_marker_mimic(client, subject_to_keep):
     query = """
         SELECT b.*, i.stay_id, i.icu_intime
-        FROM physionet-data.mimic_derived.cardiac_marker b
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON b.subject_id = i.subject_id
+        FROM physionet-data.mimiciv_2_2_derived.cardiac_marker b
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON b.subject_id = i.subject_id
         where b.subject_id in ({icuids})
         and b.charttime between i.icu_intime and i.icu_outtime
 
@@ -310,7 +312,7 @@ def query_chemistry_mimic(client, subject_to_keep):
             , MAX(CASE WHEN itemid = 50931 AND valuenum <=  9999 THEN valuenum ELSE NULL END) AS glucose
             , MAX(CASE WHEN itemid = 50983 AND valuenum <=  9999 THEN valuenum ELSE NULL END) AS sodium
             , MAX(CASE WHEN itemid = 50971 AND valuenum <=  9999 THEN valuenum ELSE NULL END) AS potassium
-            FROM physionet-data.mimic_hosp.labevents le
+            FROM physionet-data.mimiciv_2_2_hosp.labevents le
             WHERE le.itemid IN(
             -- comment is: LABEL | CATEGORY | FLUID | NUMBER OF ROWS IN LABEVENTS
             50862, -- ALBUMIN | CHEMISTRY | BLOOD | 146697
@@ -340,7 +342,7 @@ def query_chemistry_mimic(client, subject_to_keep):
         )
         SELECT b.*, i.stay_id, i.icu_intime
         FROM chem b
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.subject_id = b.subject_id
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.subject_id = b.subject_id
         where b.subject_id in ({icuids})
         and b.charttime between i.icu_intime and i.icu_outtime
         """.format(icuids=','.join(subject_to_keep))
@@ -351,8 +353,8 @@ def query_chemistry_mimic(client, subject_to_keep):
 def query_coagulation_mimic(client, subject_to_keep):
     query = """
         SELECT b.*, i.stay_id, i.icu_intime
-        FROM physionet-data.mimic_derived.coagulation b
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.subject_id = b.subject_id
+        FROM physionet-data.mimiciv_2_2_derived.coagulation b
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.subject_id = b.subject_id
         where b.subject_id in ({icuids})
         and b.charttime between i.icu_intime and i.icu_outtime
 
@@ -364,8 +366,8 @@ def query_coagulation_mimic(client, subject_to_keep):
 def query_cbc_mimic(client, subject_to_keep):
     query = """
         SELECT b.*, i.stay_id, i.icu_intime
-        FROM physionet-data.mimic_derived.complete_blood_count b
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON b.subject_id = i.subject_id
+        FROM physionet-data.mimiciv_2_2_derived.complete_blood_count b
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON b.subject_id = i.subject_id
         where b.subject_id in ({icuids})
         and b.charttime between i.icu_intime and i.icu_outtime
 
@@ -378,8 +380,8 @@ def query_culture_mimic(client, subject_to_keep):
     query = """
         SELECT b.subject_id, b.charttime, b.specimen, b.screen, b.positive_culture, b.has_sensitivity, 
         i.hadm_id, i.stay_id, i.icu_intime
-        FROM physionet-data.mimic_derived.culture b
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.subject_id = b.subject_id
+        FROM physionet-data.mimiciv_2_2_derived.culture b
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.subject_id = b.subject_id
         where b.subject_id in ({icuids})
         and b.charttime between i.icu_intime and i.icu_outtime
 
@@ -391,8 +393,8 @@ def query_culture_mimic(client, subject_to_keep):
 def query_enzyme_mimic(client, subject_to_keep):
     query = """
         SELECT b.*, i.stay_id, i.icu_intime
-        FROM physionet-data.mimic_derived.enzyme b
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.subject_id = b.subject_id
+        FROM physionet-data.mimiciv_2_2_derived.enzyme b
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.subject_id = b.subject_id
         where b.subject_id in ({icuids})
         and b.charttime between i.icu_intime and i.icu_outtime
 
@@ -404,8 +406,8 @@ def query_enzyme_mimic(client, subject_to_keep):
 def query_gcs_mimic(client, icuids_to_keep):
     query = """
         SELECT g.subject_id, g.stay_id, g.charttime, g.gcs, i.hadm_id, i.icu_intime
-        FROM physionet-data.mimic_derived.gcs g
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.stay_id = g.stay_id
+        FROM physionet-data.mimiciv_2_2_derived.gcs g
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = g.stay_id
         where g.stay_id in ({icuids})
         and g.charttime between i.icu_intime and i.icu_outtime
 
@@ -419,8 +421,8 @@ def query_inflammation_mimic(client, subject_to_keep):
     # query inflammation
     query = """
         SELECT g.subject_id, g.hadm_id, g.charttime, g.crp, i.stay_id, i.icu_intime
-        FROM physionet-data.mimic_derived.inflammation g 
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.subject_id = g.subject_id
+        FROM physionet-data.mimiciv_2_2_derived.inflammation g 
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.subject_id = g.subject_id
         where g.subject_id in ({icuids})
         and g.charttime between i.icu_intime and i.icu_outtime
 
@@ -432,8 +434,8 @@ def query_inflammation_mimic(client, subject_to_keep):
 def query_uo_mimic(client, icuids_to_keep):
     query = """
         SELECT g.stay_id, g.charttime, g.weight, g.uo, i.icu_intime, i.subject_id, i.hadm_id
-        FROM physionet-data.mimic_derived.urine_output_rate g 
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.stay_id = g.stay_id
+        FROM physionet-data.mimiciv_2_2_derived.urine_output_rate g 
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = g.stay_id
         where g.stay_id in ({icuids})
         and g.charttime between i.icu_intime and i.icu_outtime
 
@@ -446,8 +448,8 @@ def query_chart_lab_mimic(client, icuids_to_keep, chart_items, lab_items):
     query = \
         """
         SELECT c.subject_id, i.hadm_id, c.stay_id, c.charttime, c.itemid, c.value, c.valueuom
-        FROM `physionet-data.mimic_derived.icustay_detail` i
-        INNER JOIN `physionet-data.mimic_icu.chartevents` c ON i.stay_id = c.stay_id
+        FROM `physionet-data.mimiciv_2_2_derived.icustay_detail` i
+        INNER JOIN `physionet-data.mimiciv_2_2_icu.chartevents` c ON i.stay_id = c.stay_id
         WHERE c.stay_id IN ({icuids})
             AND c.itemid IN ({chitem})
             AND c.charttime between i.icu_intime and i.icu_outtime
@@ -456,8 +458,8 @@ def query_chart_lab_mimic(client, icuids_to_keep, chart_items, lab_items):
         UNION ALL
 
         SELECT DISTINCT i.subject_id, i.hadm_id, i.stay_id, l.charttime, l.itemid, l.value, l.valueuom
-        FROM `physionet-data.mimic_derived.icustay_detail` i
-        INNER JOIN `physionet-data.mimic_hosp.labevents` l ON i.hadm_id = l.hadm_id
+        FROM `physionet-data.mimiciv_2_2_derived.icustay_detail` i
+        INNER JOIN `physionet-data.mimiciv_2_2_hosp.labevents` l ON i.hadm_id = l.hadm_id
         WHERE i.stay_id  IN ({icuids})
             and l.itemid  IN ({labitem})
             and l.charttime between i.icu_intime and i.icu_outtime
@@ -472,8 +474,8 @@ def query_chart_lab_mimic(client, icuids_to_keep, chart_items, lab_items):
 def query_vent_mimic(client, icuids_to_keep):
     query = """
         select i.subject_id, i.hadm_id, v.stay_id, v.starttime, v.endtime, i.icu_intime, i.icu_outtime
-        FROM physionet-data.mimic_derived.icustay_detail i
-        INNER JOIN physionet-data.mimic_derived.ventilation v ON i.stay_id = v.stay_id
+        FROM physionet-data.mimiciv_2_2_derived.icustay_detail i
+        INNER JOIN physionet-data.mimiciv_2_2_derived.ventilation v ON i.stay_id = v.stay_id
         where v.stay_id in ({icuids})
         and v.starttime < i.icu_outtime
         and v.endtime > i.icu_intime
@@ -487,8 +489,8 @@ def query_antibiotics_mimic(client, icuids_to_keep):
     query = """
         select i.subject_id, i.hadm_id, v.stay_id, v.starttime, v.stoptime as endtime, v.antibiotic, 
         v.route, i.icu_intime, i.icu_outtime 
-        FROM physionet-data.mimic_derived.icustay_detail i
-        INNER JOIN physionet-data.mimic_derived.antibiotic v ON i.stay_id = v.stay_id
+        FROM physionet-data.mimiciv_2_2_derived.icustay_detail i
+        INNER JOIN physionet-data.mimiciv_2_2_derived.antibiotic v ON i.stay_id = v.stay_id
         where v.stay_id in ({icuids})
         and v.starttime < i.icu_outtime 
         and v.stoptime > i.icu_intime 
@@ -502,8 +504,8 @@ def query_antibiotics_mimic(client, icuids_to_keep):
 def query_vasoactive_mimic(client, icuids_to_keep, vasoactive_drugs):
     query = """
             select i.subject_id, i.hadm_id, v.stay_id, v.starttime, v.endtime, i.icu_intime, i.icu_outtime, 
-            FROM physionet-data.mimic_derived.icustay_detail i
-            INNER JOIN physionet-data.mimic_derived.vasoactive_agent v ON i.stay_id = v.stay_id
+            FROM physionet-data.mimiciv_2_2_derived.icustay_detail i
+            INNER JOIN physionet-data.mimiciv_2_2_derived.vasoactive_agent v ON i.stay_id = v.stay_id
             where v.stay_id in ({icuids})
             and v.starttime  < i.icu_outtime
             and v.endtime > i.icu_intime 
@@ -522,8 +524,8 @@ def query_heparin_mimic(client, subject_to_keep):
     query = \
         """
     SELECT he.subject_id, he.starttime, he.stoptime as endtime, i.hadm_id, i.stay_id, i.icu_intime, i.icu_outtime
-    FROM physionet-data.mimic_derived.heparin he
-    INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.subject_id = he.subject_id
+    FROM physionet-data.mimiciv_2_2_derived.heparin he
+    INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.subject_id = he.subject_id
     WHERE he.subject_id in ({ids}) 
     AND  he.starttime < i.icu_outtime
     AND  he.stoptime > i.icu_intime 
@@ -537,8 +539,8 @@ def query_crrt_mimic(client, icuids_to_keep):
         """
     SELECT cr.stay_id, MIN(cr.charttime) as starttime, MAX(cr.charttime) as endtime, i.subject_id, 
     i.hadm_id, i.icu_intime, i.icu_outtime
-    FROM physionet-data.mimic_derived.crrt cr
-    INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.stay_id = cr.stay_id
+    FROM physionet-data.mimiciv_2_2_derived.crrt cr
+    INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = cr.stay_id
     WHERE cr.stay_id in ({ids}) 
     AND  cr.charttime BETWEEN i.icu_intime AND i.icu_outtime
     GROUP BY cr.stay_id, i.subject_id, i.hadm_id, i.icu_intime, i.icu_outtime
@@ -557,7 +559,7 @@ def query_rbc_trans_mimic(client, icuids_to_keep):
             , stay_id
             , starttime
             , endtime
-            FROM physionet-data.mimic_icu.inputevents
+            FROM physionet-data.mimiciv_2_2_icu.inputevents
             WHERE (itemid in
             (
             225168,  --Packed Red Blood Cells
@@ -571,7 +573,7 @@ def query_rbc_trans_mimic(client, icuids_to_keep):
 
         SELECT rbc.stay_id, rbc.starttime, rbc.endtime, i.subject_id, i.hadm_id, i.icu_intime, i.icu_outtime
         FROM rbc
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.stay_id = rbc.stay_id
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = rbc.stay_id
         WHERE starttime < i.icu_outtime
         AND  endtime > i.icu_intime 
         ORDER BY stay_id
@@ -589,7 +591,7 @@ def query_pll_trans_mimic(client, icuids_to_keep):
             , stay_id
             , starttime
             , endtime
-            FROM physionet-data.mimic_icu.inputevents
+            FROM physionet-data.mimiciv_2_2_icu.inputevents
             WHERE (itemid in
             (
                 225170,  --Platelets
@@ -603,7 +605,7 @@ def query_pll_trans_mimic(client, icuids_to_keep):
 
         SELECT pll.stay_id, pll.starttime, pll.endtime, i.subject_id, i.hadm_id, i.icu_intime, i.icu_outtime
         FROM pll
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.stay_id = pll.stay_id
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = pll.stay_id
         WHERE starttime < i.icu_outtime
         AND  endtime > i.icu_intime 
         ORDER BY stay_id
@@ -621,7 +623,7 @@ def query_ffp_trans_mimic(client, icuids_to_keep):
             , stay_id
             , starttime
             , endtime
-            FROM physionet-data.mimic_icu.inputevents
+            FROM physionet-data.mimiciv_2_2_icu.inputevents
             WHERE (itemid in
             (
                 220970,  -- Fresh Frozen Plasma
@@ -635,7 +637,7 @@ def query_ffp_trans_mimic(client, icuids_to_keep):
 
         SELECT ffp.stay_id, ffp.starttime, ffp.endtime, i.subject_id, i.hadm_id, i.icu_intime, i.icu_outtime
         FROM ffp
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.stay_id = ffp.stay_id
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = ffp.stay_id
         WHERE starttime < i.icu_outtime
         AND  endtime > i.icu_intime 
         ORDER BY stay_id
@@ -661,7 +663,7 @@ def query_colloid_mimic(client, icuids_to_keep):
                 when mv.amountuom = 'ml'
                     then mv.amount
                 else null end) as amount
-            from physionet-data.mimic_icu.inputevents mv
+            from physionet-data.mimiciv_2_2_icu.inputevents mv
             where mv.itemid in
             (
                 220864, --  Albumin 5%  7466 132 7466
@@ -690,7 +692,7 @@ def query_colloid_mimic(client, icuids_to_keep):
         select coll.stay_id, coll.charttime as starttime, coll.endtime, coll.amount as colloid_bolus, 
         i.subject_id, i.hadm_id, i.icu_intime, i.icu_outtime
         from coll
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.stay_id = coll.stay_id
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = coll.stay_id
         -- just because the rate was high enough, does *not* mean the final amount was
         WHERE charttime < i.icu_outtime
         AND  endtime > i.icu_intime 
@@ -718,7 +720,7 @@ def query_crystalloid_mimic(client, icuids_to_keep):
                 when mv.amountuom = 'ml'
                     then mv.amount
                 else null end) as amount
-            from physionet-data.mimic_icu.inputevents mv
+            from physionet-data.mimiciv_2_2_icu.inputevents mv
             where mv.itemid in
             (
                 -- 225943 Solution
@@ -751,7 +753,7 @@ def query_crystalloid_mimic(client, icuids_to_keep):
         select crys.stay_id, crys.charttime as starttime, crys.endtime, crys.amount as crystalloid_bolus, 
         i.subject_id, i.hadm_id, i.icu_intime, i.icu_outtime
         from crys
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.stay_id = crys.stay_id
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.stay_id = crys.stay_id
         WHERE charttime < i.icu_outtime
         AND  endtime > i.icu_intime 
         --group by coll.stay_id, coll.charttime, coll.endtime
@@ -765,8 +767,8 @@ def query_crystalloid_mimic(client, icuids_to_keep):
 def query_anchor_year_mimic(client, icuids_to_keep):
     query = """
         select i.subject_id, i.hadm_id, i.stay_id, i.icu_intime, i.icu_outtime, v.anchor_year, v.anchor_year_group
-        FROM physionet-data.mimic_derived.icustay_detail i
-        INNER JOIN physionet-data.mimic_core.patients v ON i.subject_id = v.subject_id
+        FROM physionet-data.mimiciv_2_2_derived.icustay_detail i
+        INNER JOIN physionet-data.mimiciv_2_2_hosp.patients v ON i.subject_id = v.subject_id
         where i.stay_id in ({icuids})
         ;
         """.format(icuids=','.join(icuids_to_keep))
@@ -781,8 +783,8 @@ def query_comorbidity_mimic(client, icuids_to_keep):
         c.rheumatic_disease, c.peptic_ulcer_disease, c.mild_liver_disease, c.diabetes_without_cc, 
         c.diabetes_with_cc, c.paraplegia, c.renal_disease, c.malignant_cancer, c.severe_liver_disease, 
         c.metastatic_solid_tumor, c.aids
-        FROM physionet-data.mimic_derived.charlson c
-        INNER JOIN physionet-data.mimic_derived.icustay_detail i ON i.hadm_id = c.hadm_id
+        FROM physionet-data.mimiciv_2_2_derived.charlson c
+        INNER JOIN physionet-data.mimiciv_2_2_derived.icustay_detail i ON i.hadm_id = c.hadm_id
         where i.stay_id in ({icuids})
         """.format(icuids=','.join(icuids_to_keep))
     comorbidity = gcp2df(client, query)
@@ -1931,4 +1933,3 @@ def query_comorbidity_eicu(client, icuids_to_keep):
         """.format(icuids=','.join(icuids_to_keep))
     commo = gcp2df(client, query)
     return commo
-
