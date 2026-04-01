@@ -29,15 +29,22 @@ def hdf5_to_npy(hdf5_path, out_path):
             head.append(arr)
         return head
 
+    # def build_static(static_df):
+    #     df = static_df.copy()
+    #     dt_cols = df.select_dtypes(include=['datetime64']).columns
+    #     df = df.drop(columns=dt_cols)
+    #     str_cols = df.select_dtypes(include=['object', 'category']).columns
+    #     for col in str_cols:
+    #         df[col] = pd.Categorical(df[col]).codes.astype(np.float32)
+    #     df = df.astype(np.float32)
+    #     return [row.values for _, row in df.iterrows()]
+    
+    # Guardar apenas a coluna de mortalidade, convertida para float32, para cada paciente
     def build_static(static_df):
-        df = static_df.copy()
-        dt_cols = df.select_dtypes(include=['datetime64']).columns
-        df = df.drop(columns=dt_cols)
-        str_cols = df.select_dtypes(include=['object', 'category']).columns
-        for col in str_cols:
-            df[col] = pd.Categorical(df[col]).codes.astype(np.float32)
-        df = df.astype(np.float32)
-        return [row.values for _, row in df.iterrows()]
+        # coluna de mortalidade — coluna 0 do array
+        mort_col = 'mort_hosp' if 'mort_hosp' in static_df.columns else 'hosp_mort'
+        return [np.array([row[mort_col]], dtype=np.float32) 
+            for _, row in static_df.iterrows()]
 
     print('A construir arrays...')
     data_label = {
