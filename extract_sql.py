@@ -863,7 +863,7 @@ def get_patient_group_eicu(args, client):
     if args.patient_group != 'Generic':
         query = \
             """
-            SELECT i.patientunitstayid, i.gender, i.age, i.race,  
+            SELECT i.patientunitstayid, i.gender, i.age, i.ethnicity,  
                     CASE WHEN lower(i.hospitaldischargestatus) like '%alive%' THEN 0
                         WHEN lower(i.hospitaldischargestatus) like '%expired%' THEN 1
                         ELSE NULL END AS hosp_mort,
@@ -882,7 +882,7 @@ def get_patient_group_eicu(args, client):
     else:
         query = \
             """
-            SELECT i.patientunitstayid, i.gender, i.age, i.race,  
+            SELECT i.patientunitstayid, i.gender, i.age, i.ethnicity,  
                     CASE WHEN lower(i.hospitaldischargestatus) like '%alive%' THEN 0
                         WHEN lower(i.hospitaldischargestatus) like '%expired%' THEN 1
                         ELSE NULL END AS hosp_mort,
