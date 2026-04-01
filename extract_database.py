@@ -32,7 +32,7 @@ def extract_mimic(args):
     patient.set_index('stay_id', inplace=True)
     patient['max_hours'] = (patient['icu_outtime'] - patient['icu_intime']).apply(to_hours)
     missing_hours_fill = range_unnest(patient, 'max_hours', out_col_name='hours_in', reset_index=True)
-    missing_hours_fill['tmp'] = np.NaN
+    missing_hours_fill['tmp'] = np.nan
     fill_df = patient.reset_index()[ID_COLS].join(missing_hours_fill.set_index('stay_id'), on='stay_id')
     fill_df.set_index(ID_COLS + ['hours_in'], inplace=True)
 
@@ -529,7 +529,7 @@ def extract_eicu(args):
     patient.set_index('patientunitstayid', inplace=True)
     patient['max_hours'] = (patient['unitdischargeoffset'] - patient['unitadmitoffset']).apply(to_hours)
     missing_hours_fill = range_unnest(patient, 'max_hours', out_col_name='hours_in', reset_index=True)
-    missing_hours_fill['tmp'] = np.NaN
+    missing_hours_fill['tmp'] = np.nan
     fill_df = patient.reset_index()[ID_COLS].join(missing_hours_fill.set_index('patientunitstayid'),
                                                   on='patientunitstayid')
     fill_df.set_index(ID_COLS + ['hours_in'], inplace=True)
