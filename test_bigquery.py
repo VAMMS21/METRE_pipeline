@@ -8,7 +8,7 @@ client = bigquery.Client(project=project_id)
 
 query = """
 SELECT *
-FROM `physionet-data.mimic_icu.icustays`
+FROM `physionet-data.mimiciv_2.2_icu.icustays`
 LIMIT 10
 """
 
