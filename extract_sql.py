@@ -377,7 +377,7 @@ def query_culture_mimic(client, subject_to_keep):
     query = """
         SELECT b.subject_id, b.charttime, b.specimen, b.screen, b.positive_culture, b.has_sensitivity, 
         i.hadm_id, i.stay_id, i.icu_intime
-        FROM physionet-data.mimiciv_3_1_derived.culture b
+        FROM metre-489201.mimiciv_3_1_new_derived.culture b
         INNER JOIN physionet-data.mimiciv_3_1_derived.icustay_detail i ON i.subject_id = b.subject_id
         where b.subject_id in ({icuids})
         and b.charttime between i.icu_intime and i.icu_outtime
