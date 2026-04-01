@@ -1,0 +1,11 @@
+torch
+numpy
+pandas
+scipy
+scikit-learn
+tqdm
+bayesian-optimization
+matplotlib
+palettable
+tables
+h5py
