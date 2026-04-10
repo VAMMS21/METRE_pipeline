@@ -159,7 +159,11 @@ def train_model(args, c_fold, model, model_opt, train_dataloader, dev_dataloader
         # calculate AUROC
         y_l = torch.concat(y_list).cpu().numpy()
         y_pred_l = np.concatenate([f_sm(y_pred_list[i]).cpu().numpy() for i in range(len(y_pred_list))])
-        dev_roc = roc_auc_score(y_l.squeeze(-1), y_pred_l[:, 1])
+        # dev_roc = roc_auc_score(y_l.squeeze(-1), y_pred_l[:, 1])
+        try:
+            dev_roc = roc_auc_score(y_l.squeeze(-1), y_pred_l[:, 1])
+        except ValueError:
+            dev_roc = 0.5  # valor neutro quando só há uma classe
 
         if args.cal_pos_acc == True:
             val_pos_acc = cal_pos_acc(y_pred_list, y_list, pos_ind=1)
