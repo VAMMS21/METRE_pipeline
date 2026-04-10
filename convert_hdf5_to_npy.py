@@ -2,63 +2,76 @@ import pandas as pd
 import numpy as np
 import os
 
-print("A iniciar conversão...")
-
 OUTPUT_DIR = './output'
 MIMIC_HDF5 = os.path.join(OUTPUT_DIR, 'MIMIC_split.hdf5')
 EICU_HDF5  = os.path.join(OUTPUT_DIR, 'eICU_split.hdf5')
 
 def hdf5_to_npy(hdf5_path, out_path):
-    print(f'A ler {hdf5_path}...')
-
-    vital_train  = pd.read_hdf(hdf5_path, key='vital_train')
-    vital_dev    = pd.read_hdf(hdf5_path, key='vital_dev')
-    vital_test   = pd.read_hdf(hdf5_path, key='vital_test')
+    print(f'A converter {hdf5_path}...')
+    
+    vital_train = pd.read_hdf(hdf5_path, key='vital_train')
+    vital_dev   = pd.read_hdf(hdf5_path, key='vital_dev')
+    vital_test  = pd.read_hdf(hdf5_path, key='vital_test')
+    inv_train   = pd.read_hdf(hdf5_path, key='inv_train')
+    inv_dev     = pd.read_hdf(hdf5_path, key='inv_dev')
+    inv_test    = pd.read_hdf(hdf5_path, key='inv_test')
     static_train = pd.read_hdf(hdf5_path, key='static_train')
     static_dev   = pd.read_hdf(hdf5_path, key='static_dev')
     static_test  = pd.read_hdf(hdf5_path, key='static_test')
 
-    # detectar nome do index de paciente automaticamente
-    id_col = vital_train.index.names[0]
-    print(f'Index de paciente: {id_col}')
+    # ver colunas disponíveis
+    print('Colunas static_train:', static_train.columns.tolist())
+    print('Shape vital_train:', vital_train.shape)
+    print('Shape static_train:', static_train.shape)
 
+    # identificar coluna de mortalidade
+    mort_col = 'hosp_mort' if 'hosp_mort' in static_train.columns else static_train.columns[0]
+    print(f'A usar coluna de mortalidade: {mort_col}')
+
+    # agrupar vital por paciente (stay_id) -> lista de arrays (n_features, n_horas)
     def build_head(vital_df):
         head = []
-        for _, group in vital_df.groupby(level=id_col):
-            arr = group.values.T.astype(np.float32)
-            head.append(arr)
+        for stay_id, group in vital_df.groupby(level='stay_id'):
+            # pivot: linhas=horas, colunas=features -> transpor para (features, horas)
+            arr = group.values.T  # shape (n_features, n_horas)
+            head.append(arr.astype(np.float32))
         return head
 
-    # def build_static(static_df):
-    #     df = static_df.copy()
-    #     dt_cols = df.select_dtypes(include=['datetime64']).columns
-    #     df = df.drop(columns=dt_cols)
-    #     str_cols = df.select_dtypes(include=['object', 'category']).columns
-    #     for col in str_cols:
-    #         df[col] = pd.Categorical(df[col]).codes.astype(np.float32)
-    #     df = df.astype(np.float32)
-    #     return [row.values for _, row in df.iterrows()]
-    
-    # Guardar apenas a coluna de mortalidade, convertida para float32, para cada paciente
-    def build_static(static_df):
-        # coluna de mortalidade — coluna 0 do array
-        mort_col = 'mort_hosp' if 'mort_hosp' in static_df.columns else 'hosp_mort'
-        return [np.array([row[mort_col]], dtype=np.float32) 
-            for _, row in static_df.iterrows()]
+    print('A construir train_head...')
+    train_head = build_head(vital_train)
+    print('A construir dev_head...')
+    dev_head   = build_head(vital_dev)
+    print('A construir test_head...')
+    test_head  = build_head(vital_test)
 
-    print('A construir arrays...')
+    # static filter: mortalidade + outras features estáticas numéricas
+    def build_static(static_df, mort_col):
+        result = []
+        for stay_id, row in static_df.iterrows():
+            arr = row.values.astype(np.float32)
+            result.append(arr)
+        return result
+
+    static_train_filter = build_static(static_train, mort_col)
+    static_dev_filter   = build_static(static_dev, mort_col)
+    static_test_filter  = build_static(static_test, mort_col)
+
     data_label = {
-        'train_head': build_head(vital_train),
-        'static_train_filter': build_static(static_train),
-        'dev_head': build_head(vital_dev),
-        'static_dev_filter': build_static(static_dev),
-        'test_head': build_head(vital_test),
-        'static_test_filter': build_static(static_test),
+        'train_head': train_head,
+        'static_train_filter': static_train_filter,
+        'dev_head': dev_head,
+        'static_dev_filter': static_dev_filter,
+        'test_head': test_head,
+        'static_test_filter': static_test_filter,
     }
 
     np.save(out_path, data_label)
-    print(f'Guardado: {out_path} ({len(data_label["train_head"])} pacientes treino)')
+    print(f'Guardado em {out_path}')
+    print(f'  train: {len(train_head)} pacientes')
+    print(f'  dev:   {len(dev_head)} pacientes')
+    print(f'  test:  {len(test_head)} pacientes')
 
 hdf5_to_npy(MIMIC_HDF5, os.path.join(OUTPUT_DIR, 'MIMIC_compile.npy'))
 hdf5_to_npy(EICU_HDF5,  os.path.join(OUTPUT_DIR, 'eICU_compile.npy'))
-print('Conversão completa.')
+
+print('\nConversão completa.')

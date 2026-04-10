@@ -1,6 +1,8 @@
 # parameter tuning
 import torch
 import torch.nn as nn
+# import pandas adicionado para ler o hdf5 diretamente
+import pandas as pandas
 import numpy as np
 import argparse
 import json
@@ -168,23 +170,50 @@ if __name__ == "__main__":
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     task_map = {0: 'hosp_mort', 1: 'ARF', 2: 'shock'}
-    # load data -- reads directly from hdf5
+    # # load data
+    # data_label = np.load(args.dataset_path, allow_pickle=True).item()
+    # train_head = data_label['train_head']
+    # static_train_filter = data_label['static_train_filter']
+    # dev_head = data_label['dev_head']
+    # static_dev_filter = data_label['static_dev_filter']
+    # test_head = data_label['test_head']
+    # static_test_filter = data_label['static_test_filter']
+    # s_train = np.stack(static_train_filter, axis=0)
+    # s_dev = np.stack(static_dev_filter, axis=0)
+    # s_test = np.stack(static_test_filter, axis=0)
+    # # load cross validation data from the other database
+    # data_label = np.load(args.dataset_path_cv, allow_pickle=True).item()
+    # etrain_head = data_label['train_head']
+    # estatic_train_filter = data_label['static_train_filter']
+    # edev_head = data_label['dev_head']
+    # estatic_dev_filter = data_label['static_dev_filter']
+    # etest_head = data_label['test_head']
+    # estatic_test_filter = data_label['static_test_filter']
+    # es_train = np.stack(estatic_train_filter, axis=0)
+    # es_dev = np.stack(estatic_dev_filter, axis=0)
+    # es_test = np.stack(estatic_test_filter, axis=0)
+
+    # load data — lê directamente do hdf5
+
     def hdf5_to_lists(hdf5_path):
-        vital_train  = pd.read_hdf(hdf5_path, key='vital_train')
-        vital_dev    = pd.read_hdf(hdf5_path, key='vital_dev')
-        vital_test   = pd.read_hdf(hdf5_path, key='vital_test')
-        static_train = pd.read_hdf(hdf5_path, key='static_train')
-        static_dev   = pd.read_hdf(hdf5_path, key='static_dev')
-        static_test  = pd.read_hdf(hdf5_path, key='static_test')
+        vital_train  = pandas.read_hdf(hdf5_path, key='vital_train')
+        vital_dev    = pandas.read_hdf(hdf5_path, key='vital_dev')
+        vital_test   = pandas.read_hdf(hdf5_path, key='vital_test')
+        static_train = pandas.read_hdf(hdf5_path, key='static_train')
+        static_dev   = pandas.read_hdf(hdf5_path, key='static_dev')
+        static_test  = pandas.read_hdf(hdf5_path, key='static_test')
+
         id_col = vital_train.index.names[0]
         mort_col = 'mort_hosp' if 'mort_hosp' in static_train.columns else 'hosp_mort'
+
         def build_head(df):
             return [group.values.T.astype(np.float32)
                     for _, group in df.groupby(level=id_col)]
+
         def build_static(df):
-            unique = df[~df.index.duplicated(keep='first')]
             return [np.array([row[mort_col]], dtype=np.float32)
-                    for _, row in unique.iterrows()]
+                    for _, row in df.iterrows()]
+
         return {
             'train_head': build_head(vital_train),
             'static_train_filter': build_static(static_train),
@@ -193,6 +222,7 @@ if __name__ == "__main__":
             'test_head': build_head(vital_test),
             'static_test_filter': build_static(static_test),
         }
+
     print('A carregar dados MIMIC...')
     d = hdf5_to_lists(args.dataset_path)
     train_head          = d['train_head']
@@ -204,6 +234,7 @@ if __name__ == "__main__":
     s_train = np.stack(static_train_filter, axis=0)
     s_dev   = np.stack(static_dev_filter,   axis=0)
     s_test  = np.stack(static_test_filter,  axis=0)
+
     print('A carregar dados eICU...')
     e = hdf5_to_lists(args.dataset_path_cv)
     etrain_head          = e['train_head']
@@ -215,6 +246,8 @@ if __name__ == "__main__":
     es_train = np.stack(estatic_train_filter, axis=0)
     es_dev   = np.stack(estatic_dev_filter,   axis=0)
     es_test  = np.stack(estatic_test_filter,  axis=0)
+
+    
 
     print('Running target %d, thresh %d, gap %d, model %s' % (args.target_index, args.thresh, args.gap, args.model_name))
     workname = date + '_%s' % task_map[args.target_index] + '_%dh' % args.thresh + '_%sh' % args.gap + '_%s' % (args.model_name.lower())
@@ -275,10 +308,15 @@ if __name__ == "__main__":
     # create model
     if args.model_name == 'TCN':
         print('Creating TCN')
-        model = models.TemporalConv(num_inputs=200, num_channels=[int(i) for i in args.num_channels], \
+        # model = models.TemporalConv(num_inputs=200, num_channels=[int(i) for i in args.num_channels], \
+        #                             kernel_size=args.kernel_size, dropout=args.dropout, \
+        #                             output_class=args.output_classes)
+        num_inputs = train_head[0].shape[0]
+        model = models.TemporalConv(num_inputs=num_inputs, num_channels=[int(i) for i in args.num_channels], \
                                     kernel_size=args.kernel_size, dropout=args.dropout, \
                                     output_class=args.output_classes)
-        torch.save(model.state_dict(), '/content/start_weights.pt')
+        # torch.save(model.state_dict(), '/content/start_weights.pt')
+        torch.save(model.state_dict(), './checkpoints/start_weights.pt')
         print('Saving Initial Weights')
         print("Trainable params in TCN is %d" % count_parameters(model))
     elif args.model_name == 'RNN':
@@ -287,15 +325,18 @@ if __name__ == "__main__":
                                       output_dim=args.output_classes, dropout_prob=args.dropout,
                                       idrop=args.idrop)
 
-        torch.save(model.state_dict(), '/content/start_weights.pt')
+        # torch.save(model.state_dict(), '/content/start_weights.pt')
+        torch.save(model.state_dict(), './checkpoints/start_weights.pt')
         print('Saving Initial Weights')
         print("Trainable params in RNN is %d" % count_parameters(model))
 
     else:
-        model = models.Trans_encoder(feature_dim=200, d_model=args.d_model, \
+        num_inputs = train_head[0].shape[0]
+        model = models.Trans_encoder(feature_dim=num_inputs, d_model=args.d_model, \
                                      nhead=args.n_head, d_hid=args.dim_ff_mul * args.d_model, \
                                      nlayers=args.num_enc_layer, out_dim=args.output_classes, dropout=args.dropout)
-        torch.save(model.state_dict(), '/content/start_weights.pt')
+        # torch.save(model.state_dict(), '/content/start_weights.pt')
+        torch.save(model.state_dict(), './checkpoints/start_weights.pt')
         print('Saving Initial Weights')
         print("Trainable params in RNN is %d" % count_parameters(model))
 
@@ -315,14 +356,17 @@ if __name__ == "__main__":
     else:
         print('No warm up')
         model_opt = torch.optim.Adam(model.parameters(), lr=args.lr)
-        torch.save(model_opt.state_dict(), '/content/start_weights_opt.pt')
+        # torch.save(model_opt.state_dict(), '/content/start_weights_opt.pt')
+        torch.save(model_opt.state_dict(), './checkpoints/start_weights_opt.pt')
 
     for c_fold, (train_index, test_index) in enumerate(kf.split(trainval_data)):
         best_loss = 1e4
         patience = 0
         if c_fold >= 1:
-            model.load_state_dict(torch.load('/content/start_weights.pt'))
-            model_opt.load_state_dict(torch.load('/content/start_weights_opt.pt'))
+            # model.load_state_dict(torch.load('/content/start_weights.pt'))
+            model.load_state_dict(torch.load('./checkpoints/start_weights.pt'))
+            # model_opt.load_state_dict(torch.load('/content/start_weights_opt.pt'))
+            model_opt.load_state_dict(torch.load('./checkpoints/start_weights_opt.pt'))
         print('Starting Fold %d' % c_fold)
         print("TRAIN:", len(train_index), "TEST:", len(test_index))
 
@@ -331,11 +375,20 @@ if __name__ == "__main__":
         train_dataloader, dev_dataloader, test_dataloader = prepare_data.get_data_loader( \
             args, train_cv, dev_cv, test_data, train_labelcv, dev_labelcv, test_label)
 
+        # ctype, count = np.unique(dev_labelcv, return_counts=True)
+        # total_dev_samples = len(dev_labelcv)
+        # weights_per_class = torch.FloatTensor([total_dev_samples / k / len(ctype) for k in count]).to(
+        #     device)
+        # ce_val_loss = nn.CrossEntropyLoss(weight=weights_per_class)
+
         ctype, count = np.unique(dev_labelcv, return_counts=True)
         total_dev_samples = len(dev_labelcv)
-        weights_per_class = torch.FloatTensor([total_dev_samples / k / len(ctype) for k in count]).to(
-            device)
-        ce_val_loss = nn.CrossEntropyLoss(weight=weights_per_class)
+        if len(ctype) == 2:
+            weights_per_class = torch.FloatTensor([total_dev_samples / k / len(ctype) for k in count]).to(device)
+            ce_val_loss = nn.CrossEntropyLoss(weight=weights_per_class)
+        else:
+            ce_val_loss = nn.CrossEntropyLoss()
+
 
         best_model = utils.train_model(args, c_fold, model, model_opt, train_dataloader,
                                        dev_dataloader, ce_loss, ce_val_loss)
@@ -406,4 +459,4 @@ if __name__ == "__main__":
                 '(%.3f-%.3f)' % st.t.interval(alpha=0.95, df=len(prc), loc=np.mean(prc), scale=np.std(prc)))
             result_dict['fold%d'%c_fold].append(len(crossval_target))
 
-    write_json('./checkpoints', args.checkpoint_model + '.json', result_dict)# TESTE_UNICO_123
+    write_json('./checkpoints', args.checkpoint_model + '.json', result_dict)
