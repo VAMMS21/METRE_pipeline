@@ -406,4 +406,4 @@ if __name__ == "__main__":
                 '(%.3f-%.3f)' % st.t.interval(alpha=0.95, df=len(prc), loc=np.mean(prc), scale=np.std(prc)))
             result_dict['fold%d'%c_fold].append(len(crossval_target))
 
-    write_json('./checkpoints', args.checkpoint_model + '.json', result_dict)
+    write_json('./checkpoints', args.checkpoint_model + '.json', result_dict)# TESTE_UNICO_123
