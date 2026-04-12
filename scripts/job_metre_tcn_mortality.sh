@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=40G
 #SBATCH --time=2-00:00:00
-#SBATCH --partition=gpu
+#SBATCH --partition=gpu32
 #SBATCH --gres=gpu:1
 
 echo "Job started: $(date)"

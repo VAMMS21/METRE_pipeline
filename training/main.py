@@ -170,82 +170,82 @@ if __name__ == "__main__":
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     task_map = {0: 'hosp_mort', 1: 'ARF', 2: 'shock'}
-    # # load data
-    # data_label = np.load(args.dataset_path, allow_pickle=True).item()
-    # train_head = data_label['train_head']
-    # static_train_filter = data_label['static_train_filter']
-    # dev_head = data_label['dev_head']
-    # static_dev_filter = data_label['static_dev_filter']
-    # test_head = data_label['test_head']
-    # static_test_filter = data_label['static_test_filter']
-    # s_train = np.stack(static_train_filter, axis=0)
-    # s_dev = np.stack(static_dev_filter, axis=0)
-    # s_test = np.stack(static_test_filter, axis=0)
-    # # load cross validation data from the other database
-    # data_label = np.load(args.dataset_path_cv, allow_pickle=True).item()
-    # etrain_head = data_label['train_head']
-    # estatic_train_filter = data_label['static_train_filter']
-    # edev_head = data_label['dev_head']
-    # estatic_dev_filter = data_label['static_dev_filter']
-    # etest_head = data_label['test_head']
-    # estatic_test_filter = data_label['static_test_filter']
-    # es_train = np.stack(estatic_train_filter, axis=0)
-    # es_dev = np.stack(estatic_dev_filter, axis=0)
-    # es_test = np.stack(estatic_test_filter, axis=0)
+    # load data
+    data_label = np.load(args.dataset_path, allow_pickle=True).item()
+    train_head = data_label['train_head']
+    static_train_filter = data_label['static_train_filter']
+    dev_head = data_label['dev_head']
+    static_dev_filter = data_label['static_dev_filter']
+    test_head = data_label['test_head']
+    static_test_filter = data_label['static_test_filter']
+    s_train = np.stack(static_train_filter, axis=0)
+    s_dev = np.stack(static_dev_filter, axis=0)
+    s_test = np.stack(static_test_filter, axis=0)
+    # load cross validation data from the other database
+    data_label = np.load(args.dataset_path_cv, allow_pickle=True).item()
+    etrain_head = data_label['train_head']
+    estatic_train_filter = data_label['static_train_filter']
+    edev_head = data_label['dev_head']
+    estatic_dev_filter = data_label['static_dev_filter']
+    etest_head = data_label['test_head']
+    estatic_test_filter = data_label['static_test_filter']
+    es_train = np.stack(estatic_train_filter, axis=0)
+    es_dev = np.stack(estatic_dev_filter, axis=0)
+    es_test = np.stack(estatic_test_filter, axis=0)
 
     # load data — lê directamente do hdf5
 
-    def hdf5_to_lists(hdf5_path):
-        vital_train  = pandas.read_hdf(hdf5_path, key='vital_train')
-        vital_dev    = pandas.read_hdf(hdf5_path, key='vital_dev')
-        vital_test   = pandas.read_hdf(hdf5_path, key='vital_test')
-        static_train = pandas.read_hdf(hdf5_path, key='static_train')
-        static_dev   = pandas.read_hdf(hdf5_path, key='static_dev')
-        static_test  = pandas.read_hdf(hdf5_path, key='static_test')
+    # def hdf5_to_lists(hdf5_path):
+    #     vital_train  = pandas.read_hdf(hdf5_path, key='vital_train')
+    #     vital_dev    = pandas.read_hdf(hdf5_path, key='vital_dev')
+    #     vital_test   = pandas.read_hdf(hdf5_path, key='vital_test')
+    #     static_train = pandas.read_hdf(hdf5_path, key='static_train')
+    #     static_dev   = pandas.read_hdf(hdf5_path, key='static_dev')
+    #     static_test  = pandas.read_hdf(hdf5_path, key='static_test')
 
-        id_col = vital_train.index.names[0]
-        mort_col = 'mort_hosp' if 'mort_hosp' in static_train.columns else 'hosp_mort'
+    #     id_col = vital_train.index.names[0]
+    #     mort_col = 'mort_hosp' if 'mort_hosp' in static_train.columns else 'hosp_mort'
 
-        def build_head(df):
-            return [group.values.T.astype(np.float32)
-                    for _, group in df.groupby(level=id_col)]
+    #     def build_head(df):
+    #         return [group.values.T.astype(np.float32)
+    #                 for _, group in df.groupby(level=id_col)]
 
-        def build_static(df):
-            return [np.array([row[mort_col]], dtype=np.float32)
-                    for _, row in df.iterrows()]
+    #     def build_static(df):
+    #         return [np.array([row[mort_col]], dtype=np.float32)
+    #                 for _, row in df.iterrows()]
 
-        return {
-            'train_head': build_head(vital_train),
-            'static_train_filter': build_static(static_train),
-            'dev_head': build_head(vital_dev),
-            'static_dev_filter': build_static(static_dev),
-            'test_head': build_head(vital_test),
-            'static_test_filter': build_static(static_test),
-        }
+    #     return {
+    #         'train_head': build_head(vital_train),
+    #         'static_train_filter': build_static(static_train),
+    #         'dev_head': build_head(vital_dev),
+    #         'static_dev_filter': build_static(static_dev),
+    #         'test_head': build_head(vital_test),
+    #         'static_test_filter': build_static(static_test),
+    #     }
 
-    print('A carregar dados MIMIC...')
-    d = hdf5_to_lists(args.dataset_path)
-    train_head          = d['train_head']
-    static_train_filter = d['static_train_filter']
-    dev_head            = d['dev_head']
-    static_dev_filter   = d['static_dev_filter']
-    test_head           = d['test_head']
-    static_test_filter  = d['static_test_filter']
-    s_train = np.stack(static_train_filter, axis=0)
-    s_dev   = np.stack(static_dev_filter,   axis=0)
-    s_test  = np.stack(static_test_filter,  axis=0)
+    # print('A carregar dados MIMIC...')
+    # d = hdf5_to_lists(args.dataset_path)
+    # train_head          = d['train_head']
+    # static_train_filter = d['static_train_filter']
+    # dev_head            = d['dev_head']
+    # static_dev_filter   = d['static_dev_filter']
+    # test_head           = d['test_head']
+    # static_test_filter  = d['static_test_filter']
+    # s_train = np.stack(static_train_filter, axis=0)
+    # s_dev   = np.stack(static_dev_filter,   axis=0)
+    # s_test  = np.stack(static_test_filter,  axis=0)
 
-    print('A carregar dados eICU...')
-    e = hdf5_to_lists(args.dataset_path_cv)
-    etrain_head          = e['train_head']
-    estatic_train_filter = e['static_train_filter']
-    edev_head            = e['dev_head']
-    estatic_dev_filter   = e['static_dev_filter']
-    etest_head           = e['test_head']
-    estatic_test_filter  = e['static_test_filter']
-    es_train = np.stack(estatic_train_filter, axis=0)
-    es_dev   = np.stack(estatic_dev_filter,   axis=0)
-    es_test  = np.stack(estatic_test_filter,  axis=0)
+    # print('A carregar dados eICU...')
+    # e = hdf5_to_lists(args.dataset_path_cv)
+    # etrain_head          = e['train_head']
+    # estatic_train_filter = e['static_train_filter']
+    # edev_head            = e['dev_head']
+    # estatic_dev_filter   = e['static_dev_filter']
+    # etest_head           = e['test_head']
+    # estatic_test_filter  = e['static_test_filter']
+    # es_train = np.stack(estatic_train_filter, axis=0)
+    # es_dev   = np.stack(estatic_dev_filter,   axis=0)
+    # es_test  = np.stack(estatic_test_filter,  axis=0)
 
     
 
