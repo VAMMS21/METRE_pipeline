@@ -14,9 +14,9 @@ echo "Node: $(hostname)"
 echo "GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader)"
 
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate metre_env
+conda activate metre_clean
 
-cd ~/METRE_pipeline/training
+cd ~/metre_pipeline/training
 
 python main.py \
   --dataset_path /net/sharedfolders/datasets/MOTION/mscMEDICU/output/MIMIC_compile.npy \
