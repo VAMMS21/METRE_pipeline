@@ -1,0 +1,295 @@
+Job started: Tue Apr 14 00:15:27 WEST 2026
+Node: hpc04
+GPU: Tesla V100S-PCIE-32GB
+Running target 0, thresh 48, gap 6, model TCN
+0414_hosp_mort_48h_6h_tcn
+Before filtering, train size is 33206
+After filtering, train size is 16399
+Before filtering, train size is 88513
+After filtering, train size is 42696
+Creating TCN
+Saving Initial Weights
+Trainable params in TCN is 1635074
+No warm up
+Starting Fold 0
+TRAIN: 16906 TEST: 1879
+Compiled another CV data
+Train acc is 80.66%
+Validation pos acc is 86.30%
+Validation acc is 71.63%, validation ROC is 0.88
+Epoch 0, : Train loss is 0.4304, validation loss is 0.4647
+Train acc is 85.32%
+Validation pos acc is 74.89%
+Validation acc is 82.22%, validation ROC is 0.88
+Epoch 1, : Train loss is 0.3467, validation loss is 0.4807
+Train acc is 88.96%
+Validation pos acc is 81.28%
+Validation acc is 79.24%, validation ROC is 0.88
+Epoch 2, : Train loss is 0.2792, validation loss is 0.5302
+Train acc is 92.42%
+Validation pos acc is 69.41%
+Validation acc is 84.51%, validation ROC is 0.86
+Epoch 3, : Train loss is 0.2034, validation loss is 0.7965
+Train acc is 94.35%
+Validation pos acc is 68.04%
+Validation acc is 84.14%, validation ROC is 0.87
+Start next fold
+Save a model with best roc 0.874
+Starting Fold 1
+TRAIN: 16906 TEST: 1879
+Compiled another CV data
+Train acc is 80.40%
+Validation pos acc is 86.38%
+Validation acc is 71.31%, validation ROC is 0.87
+Epoch 0, : Train loss is 0.4398, validation loss is 0.4623
+Train acc is 85.87%
+Validation pos acc is 75.74%
+Validation acc is 79.46%, validation ROC is 0.87
+Epoch 1, : Train loss is 0.3358, validation loss is 0.4900
+Train acc is 89.98%
+Validation pos acc is 68.51%
+Validation acc is 83.66%, validation ROC is 0.87
+Epoch 2, : Train loss is 0.2567, validation loss is 0.5855
+Train acc is 92.91%
+Validation pos acc is 58.72%
+Validation acc is 85.42%, validation ROC is 0.85
+Epoch 3, : Train loss is 0.1907, validation loss is 0.8892
+Train acc is 94.94%
+Validation pos acc is 52.77%
+Validation acc is 85.63%, validation ROC is 0.84
+Epoch 4, : Train loss is 0.1429, validation loss is 1.2503
+Train acc is 96.10%
+Validation pos acc is 56.60%
+Validation acc is 85.42%, validation ROC is 0.83
+Epoch 5, : Train loss is 0.1139, validation loss is 1.4407
+Train acc is 96.88%
+Validation pos acc is 49.36%
+Validation acc is 85.42%, validation ROC is 0.83
+Start next fold
+Starting Fold 2
+TRAIN: 16906 TEST: 1879
+Compiled another CV data
+Train acc is 80.34%
+Validation pos acc is 81.36%
+Validation acc is 80.26%, validation ROC is 0.89
+Epoch 0, : Train loss is 0.4356, validation loss is 0.4413
+Train acc is 85.72%
+Validation pos acc is 84.32%
+Validation acc is 78.45%, validation ROC is 0.88
+Epoch 1, : Train loss is 0.3380, validation loss is 0.5389
+Train acc is 89.86%
+Validation pos acc is 72.03%
+Validation acc is 84.25%, validation ROC is 0.87
+Epoch 2, : Train loss is 0.2612, validation loss is 0.6183
+Train acc is 92.41%
+Validation pos acc is 68.64%
+Validation acc is 83.93%, validation ROC is 0.87
+Epoch 3, : Train loss is 0.2037, validation loss is 0.7562
+Train acc is 94.73%
+Validation pos acc is 58.47%
+Validation acc is 86.70%, validation ROC is 0.86
+Start next fold
+Save a model with best roc 0.880
+Starting Fold 3
+TRAIN: 16906 TEST: 1879
+Compiled another CV data
+Train acc is 81.00%
+Validation pos acc is 74.88%
+Validation acc is 81.64%, validation ROC is 0.87
+Epoch 0, : Train loss is 0.4298, validation loss is 0.5480
+Train acc is 85.80%
+Validation pos acc is 87.44%
+Validation acc is 72.80%, validation ROC is 0.88
+Epoch 1, : Train loss is 0.3358, validation loss is 0.4953
+Train acc is 89.05%
+Validation pos acc is 69.57%
+Validation acc is 81.37%, validation ROC is 0.85
+Epoch 2, : Train loss is 0.2798, validation loss is 0.6357
+Train acc is 92.64%
+Validation pos acc is 50.72%
+Validation acc is 86.06%, validation ROC is 0.84
+Epoch 3, : Train loss is 0.2030, validation loss is 0.9543
+Train acc is 94.59%
+Validation pos acc is 54.11%
+Validation acc is 85.74%, validation ROC is 0.84
+Epoch 4, : Train loss is 0.1493, validation loss is 1.1664
+Train acc is 95.95%
+Validation pos acc is 56.04%
+Validation acc is 84.25%, validation ROC is 0.84
+Epoch 5, : Train loss is 0.1189, validation loss is 1.3010
+Train acc is 97.08%
+Validation pos acc is 49.28%
+Validation acc is 87.07%, validation ROC is 0.83
+Start next fold
+Starting Fold 4
+TRAIN: 16906 TEST: 1879
+Compiled another CV data
+Train acc is 80.95%
+Validation pos acc is 71.88%
+Validation acc is 83.77%, validation ROC is 0.87
+Epoch 0, : Train loss is 0.4172, validation loss is 0.6479
+Train acc is 85.50%
+Validation pos acc is 74.11%
+Validation acc is 83.66%, validation ROC is 0.87
+Epoch 1, : Train loss is 0.3437, validation loss is 0.6131
+Train acc is 89.16%
+Validation pos acc is 70.09%
+Validation acc is 82.81%, validation ROC is 0.87
+Epoch 2, : Train loss is 0.2717, validation loss is 0.6838
+Train acc is 92.43%
+Validation pos acc is 71.43%
+Validation acc is 81.27%, validation ROC is 0.85
+Epoch 3, : Train loss is 0.2066, validation loss is 0.7520
+Train acc is 94.55%
+Validation pos acc is 62.95%
+Validation acc is 85.79%, validation ROC is 0.86
+Epoch 4, : Train loss is 0.1563, validation loss is 1.2422
+Train acc is 95.68%
+Validation pos acc is 59.38%
+Validation acc is 88.29%, validation ROC is 0.86
+Epoch 5, : Train loss is 0.1231, validation loss is 1.1139
+Train acc is 96.75%
+Validation pos acc is 52.23%
+Validation acc is 87.39%, validation ROC is 0.86
+Epoch 6, : Train loss is 0.0958, validation loss is 1.3752
+Train acc is 97.27%
+Validation pos acc is 50.89%
+Validation acc is 87.97%, validation ROC is 0.85
+Start next fold
+Starting Fold 5
+TRAIN: 16907 TEST: 1878
+Compiled another CV data
+Train acc is 80.10%
+Validation pos acc is 83.40%
+Validation acc is 79.18%, validation ROC is 0.88
+Epoch 0, : Train loss is 0.4342, validation loss is 0.4373
+Train acc is 85.73%
+Validation pos acc is 80.85%
+Validation acc is 79.82%, validation ROC is 0.87
+Epoch 1, : Train loss is 0.3486, validation loss is 0.5167
+Train acc is 89.17%
+Validation pos acc is 80.85%
+Validation acc is 77.05%, validation ROC is 0.87
+Epoch 2, : Train loss is 0.2718, validation loss is 0.6064
+Train acc is 92.16%
+Validation pos acc is 76.17%
+Validation acc is 83.65%, validation ROC is 0.88
+Epoch 3, : Train loss is 0.2125, validation loss is 0.7880
+Train acc is 94.71%
+Validation pos acc is 61.70%
+Validation acc is 85.36%, validation ROC is 0.86
+Start next fold
+Starting Fold 6
+TRAIN: 16907 TEST: 1878
+Compiled another CV data
+Train acc is 79.41%
+Validation pos acc is 78.76%
+Validation acc is 84.98%, validation ROC is 0.90
+Epoch 0, : Train loss is 0.4385, validation loss is 0.4040
+Train acc is 85.54%
+Validation pos acc is 84.46%
+Validation acc is 79.77%, validation ROC is 0.89
+Epoch 1, : Train loss is 0.3420, validation loss is 0.4392
+Train acc is 89.54%
+Validation pos acc is 80.83%
+Validation acc is 82.59%, validation ROC is 0.88
+Epoch 2, : Train loss is 0.2658, validation loss is 0.5809
+Train acc is 93.00%
+Validation pos acc is 66.84%
+Validation acc is 83.12%, validation ROC is 0.87
+Epoch 3, : Train loss is 0.1909, validation loss is 0.7236
+Train acc is 94.70%
+Validation pos acc is 46.63%
+Validation acc is 89.78%, validation ROC is 0.87
+Start next fold
+Save a model with best roc 0.882
+Starting Fold 7
+TRAIN: 16907 TEST: 1878
+Compiled another CV data
+Train acc is 80.46%
+Validation pos acc is 84.65%
+Validation acc is 75.08%, validation ROC is 0.88
+Epoch 0, : Train loss is 0.4363, validation loss is 0.4317
+Train acc is 85.45%
+Validation pos acc is 73.25%
+Validation acc is 85.62%, validation ROC is 0.89
+Epoch 1, : Train loss is 0.3502, validation loss is 0.5325
+Train acc is 89.44%
+Validation pos acc is 72.37%
+Validation acc is 83.97%, validation ROC is 0.87
+Epoch 2, : Train loss is 0.2665, validation loss is 0.6539
+Train acc is 92.70%
+Validation pos acc is 68.42%
+Validation acc is 84.56%, validation ROC is 0.87
+Epoch 3, : Train loss is 0.2003, validation loss is 1.0700
+Train acc is 94.82%
+Validation pos acc is 63.60%
+Validation acc is 86.69%, validation ROC is 0.86
+Epoch 4, : Train loss is 0.1498, validation loss is 1.1151
+Train acc is 96.29%
+Validation pos acc is 54.82%
+Validation acc is 86.85%, validation ROC is 0.86
+Epoch 5, : Train loss is 0.1092, validation loss is 1.1818
+Train acc is 96.98%
+Validation pos acc is 59.21%
+Validation acc is 87.91%, validation ROC is 0.86
+Start next fold
+Starting Fold 8
+TRAIN: 16907 TEST: 1878
+Compiled another CV data
+Train acc is 80.99%
+Validation pos acc is 82.09%
+Validation acc is 78.38%, validation ROC is 0.88
+Epoch 0, : Train loss is 0.4225, validation loss is 0.4704
+Train acc is 85.88%
+Validation pos acc is 74.63%
+Validation acc is 82.80%, validation ROC is 0.87
+Epoch 1, : Train loss is 0.3369, validation loss is 0.4889
+Train acc is 89.52%
+Validation pos acc is 80.10%
+Validation acc is 79.34%, validation ROC is 0.88
+Epoch 2, : Train loss is 0.2644, validation loss is 0.5366
+Train acc is 92.44%
+Validation pos acc is 64.18%
+Validation acc is 85.20%, validation ROC is 0.86
+Epoch 3, : Train loss is 0.2040, validation loss is 0.9065
+Train acc is 94.74%
+Validation pos acc is 63.68%
+Validation acc is 84.45%, validation ROC is 0.86
+Epoch 4, : Train loss is 0.1499, validation loss is 0.8855
+Train acc is 95.88%
+Validation pos acc is 57.21%
+Validation acc is 87.27%, validation ROC is 0.85
+Epoch 5, : Train loss is 0.1154, validation loss is 1.5967
+Train acc is 96.89%
+Validation pos acc is 54.23%
+Validation acc is 87.33%, validation ROC is 0.86
+Epoch 6, : Train loss is 0.0923, validation loss is 1.7434
+Train acc is 97.53%
+Validation pos acc is 59.70%
+Validation acc is 85.41%, validation ROC is 0.85
+Start next fold
+Starting Fold 9
+TRAIN: 16907 TEST: 1878
+Compiled another CV data
+Train acc is 80.47%
+Validation pos acc is 82.27%
+Validation acc is 78.97%, validation ROC is 0.89
+Epoch 0, : Train loss is 0.4281, validation loss is 0.4641
+Train acc is 85.70%
+Validation pos acc is 69.55%
+Validation acc is 83.07%, validation ROC is 0.88
+Epoch 1, : Train loss is 0.3391, validation loss is 0.4938
+Train acc is 89.49%
+Validation pos acc is 73.18%
+Validation acc is 82.96%, validation ROC is 0.88
+Epoch 2, : Train loss is 0.2689, validation loss is 0.5866
+Train acc is 92.30%
+Validation pos acc is 65.45%
+Validation acc is 85.52%, validation ROC is 0.88
+Epoch 3, : Train loss is 0.2040, validation loss is 0.7115
+Train acc is 94.50%
+Validation pos acc is 53.64%
+Validation acc is 86.74%, validation ROC is 0.87
+Start next fold
+Job finished: Tue Apr 14 00:53:57 WEST 2026
