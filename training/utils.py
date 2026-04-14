@@ -180,7 +180,7 @@ def train_model(args, c_fold, model, model_opt, train_dataloader, dev_dataloader
             patience = 0
         else:
             patience += 1
-            if patience >= 5:
+            if patience >= 15:
                 print('Start next fold')
                 break
         print('Epoch %d, : Train loss is %.4f, validation loss is %.4f' % (j, loss_avg, loss_te))
